@@ -138,81 +138,124 @@
           return;
         }
 
-        tvWidget.save(async (state) => {
-          try {
-            const response = await fetch('/api/save-chart', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                title,
-                chartState: state
-              })
-            });
-            
-            const result = await response.json();
-            if (result.success) {
-              alert('Saved successfully!');
-              closeModal('saveModal');
-              document.getElementById('versionTitle').value = '';
-            } else {
-              throw new Error(result.error);
+        try {
+          const saveButton = document.getElementById('saveBtn');
+          saveButton.disabled = true;
+          saveButton.textContent = 'Saving...';
+
+          tvWidget.save(async (state) => {
+            try {
+              const response = await fetch('/api/save-chart', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  title,
+                  chartState: state
+                })
+              });
+              
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to save chart');
+              }
+
+              const result = await response.json();
+              if (result.success) {
+                alert('Saved successfully!');
+                closeModal('saveModal');
+                document.getElementById('versionTitle').value = '';
+              } else {
+                throw new Error(result.error || 'Failed to save chart');
+              }
+            } catch (error) {
+              console.error('Error saving:', error);
+              alert(error.message || 'Failed to save! Please try again.');
+            } finally {
+              saveButton.disabled = false;
+              saveButton.textContent = 'Save Chart';
             }
-          } catch (error) {
-            console.error('Error saving:', error);
-            alert('Failed to save!');
-          }
-        });
+          });
+        } catch (error) {
+          console.error('Error in save process:', error);
+          alert('Failed to prepare chart for saving! Please try again.');
+          const saveButton = document.getElementById('saveBtn');
+          saveButton.disabled = false;
+          saveButton.textContent = 'Save Chart';
+        }
       }
 
       async function loadVersion(versionId) {
         try {
           const response = await fetch(`/api/charts/${versionId}`);
-          const result = await response.json();
           
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to load chart');
+          }
+
+          const result = await response.json();
           if (result.success) {
             tvWidget.load(result.chart);
             closeModal('loadModal');
           } else {
-            throw new Error(result.error);
+            throw new Error(result.error || 'Failed to load chart');
           }
         } catch (error) {
           console.error('Error loading chart:', error);
-          alert('Failed to load chart!');
+          alert(error.message || 'Failed to load chart! Please try again.');
         }
       }
 
       async function loadVersionsList() {
         try {
+          const loadButton = document.getElementById('loadBtn');
+          loadButton.disabled = true;
+          loadButton.textContent = 'Loading...';
+
           const response = await fetch('/api/charts');
-          const result = await response.json();
           
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to load versions list');
+          }
+
+          const result = await response.json();
           if (result.success) {
             const versionsContainer = document.getElementById('versionsList');
             versionsContainer.innerHTML = '';
             
-            Object.entries(result.charts).forEach(([id, data]) => {
-              const versionElement = document.createElement('div');
-              versionElement.className = 'version-item';
-              versionElement.onclick = () => loadVersion(id);
-              
-              const date = new Date(data.savedAt);
-              versionElement.innerHTML = `
-                <strong>${data.title}</strong><br>
-                <small>${date.toLocaleString()}</small>
-              `;
-              
-              versionsContainer.appendChild(versionElement);
-            });
+            const charts = Object.entries(result.charts);
+            if (charts.length === 0) {
+              versionsContainer.innerHTML = '<div class="version-item">No saved charts found</div>';
+            } else {
+              charts.forEach(([id, data]) => {
+                const versionElement = document.createElement('div');
+                versionElement.className = 'version-item';
+                versionElement.onclick = () => loadVersion(id);
+                
+                const date = new Date(data.savedAt);
+                versionElement.innerHTML = `
+                  <strong>${data.title}</strong><br>
+                  <small>${date.toLocaleString()}</small>
+                `;
+                
+                versionsContainer.appendChild(versionElement);
+              });
+            }
             
             showModal('loadModal');
           } else {
-            throw new Error(result.error);
+            throw new Error(result.error || 'Failed to load versions list');
           }
         } catch (error) {
           console.error('Error loading versions list:', error);
-          alert('Failed to load versions list!');
+          alert(error.message || 'Failed to load versions list! Please try again.');
+        } finally {
+          const loadButton = document.getElementById('loadBtn');
+          loadButton.disabled = false;
+          loadButton.textContent = 'Load Chart';
         }
       }
 
