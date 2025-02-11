@@ -1,33 +1,29 @@
 // server.js
 const express = require('express');
-const fs = require('fs').promises;
 const path = require('path');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const app = express();
 
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const CHARTS_FILE = path.join(__dirname, 'charts.json');
+// MongoDB connection
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/chartdb';
+mongoose.connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
 
-async function ensureChartFile() {
-    try {
-        await fs.access(CHARTS_FILE);
-    } catch {
-        await fs.writeFile(CHARTS_FILE, JSON.stringify({}));
-    }
-}
+// Chart Schema
+const chartSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    state: { type: mongoose.Schema.Types.Mixed, required: true },
+    savedAt: { type: Date, default: Date.now }
+});
 
-async function readCharts() {
-    await ensureChartFile();
-    const data = await fs.readFile(CHARTS_FILE, 'utf8');
-    return JSON.parse(data);
-}
-
-async function writeCharts(charts) {
-    await fs.writeFile(CHARTS_FILE, JSON.stringify(charts, null, 2));
-}
+const Chart = mongoose.model('Chart', chartSchema);
 
 // ذخیره نسخه جدید
 app.post('/api/save-chart', async (req, res) => {
@@ -38,53 +34,73 @@ app.post('/api/save-chart', async (req, res) => {
             return res.status(400).json({ success: false, error: 'Title is required' });
         }
 
-        const charts = await readCharts();
-        const versionId = `version_${Date.now()}`;
-        
-        charts[versionId] = {
+        const chart = new Chart({
             title,
             state: chartState,
-            savedAt: new Date().toISOString()
-        };
+            savedAt: new Date()
+        });
         
-        await writeCharts(charts);
-        res.json({ success: true, message: 'Version saved successfully', versionId });
+        await chart.save();
+        res.json({ 
+            success: true, 
+            message: 'Version saved successfully', 
+            versionId: chart._id 
+        });
     } catch (error) {
-        console.error('Error saving version:', error);
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Error saving chart:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Failed to save chart' 
+        });
     }
 });
 
-// بازیابی یک نسخه خاص
-app.get('/api/load-chart/:versionId', async (req, res) => {
-    try {
-        const { versionId } = req.params;
-        const charts = await readCharts();
-        
-        if (!charts[versionId]) {
-            return res.status(404).json({ success: false, error: 'Version not found' });
-        }
-        
-        res.json({ success: true, data: charts[versionId] });
-    } catch (error) {
-        console.error('Error loading version:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// گرفتن لیست تمام نسخه‌ها
+// دریافت لیست نمودارها
 app.get('/api/charts', async (req, res) => {
     try {
-        const charts = await readCharts();
-        res.json({ success: true, data: charts });
+        const charts = await Chart.find({})
+            .select('title savedAt')
+            .sort('-savedAt');
+        
+        const formattedCharts = charts.reduce((acc, chart) => {
+            acc[chart._id] = {
+                title: chart.title,
+                savedAt: chart.savedAt
+            };
+            return acc;
+        }, {});
+        
+        res.json({ success: true, charts: formattedCharts });
     } catch (error) {
-        console.error('Error listing versions:', error);
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Error fetching charts:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Failed to fetch charts' 
+        });
     }
 });
 
-const PORT = process.env.PORT || 3003;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    ensureChartFile();
+// دریافت یک نمودار
+app.get('/api/charts/:id', async (req, res) => {
+    try {
+        const chart = await Chart.findById(req.params.id);
+        if (!chart) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Chart not found' 
+            });
+        }
+        res.json({ success: true, chart: chart.state });
+    } catch (error) {
+        console.error('Error fetching chart:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Failed to fetch chart' 
+        });
+    }
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
 });

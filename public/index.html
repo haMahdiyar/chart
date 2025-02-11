@@ -86,8 +86,8 @@
   </head>
   <body>
     <div class="save-controls">
-      <button id="saveBtn" class="save-btn">Save</button>
-      <button id="loadBtn" class="save-btn">Load</button>
+      <button id="saveBtn" class="save-btn">Save Chart</button>
+      <button id="loadBtn" class="save-btn">Load Chart</button>
     </div>
 
     <!-- Save Modal -->
@@ -166,45 +166,53 @@
         });
       }
 
+      async function loadVersion(versionId) {
+        try {
+          const response = await fetch(`/api/charts/${versionId}`);
+          const result = await response.json();
+          
+          if (result.success) {
+            tvWidget.load(result.chart);
+            closeModal('loadModal');
+          } else {
+            throw new Error(result.error);
+          }
+        } catch (error) {
+          console.error('Error loading chart:', error);
+          alert('Failed to load chart!');
+        }
+      }
+
       async function loadVersionsList() {
         try {
           const response = await fetch('/api/charts');
           const result = await response.json();
           
           if (result.success) {
-            const versionsHtml = Object.entries(result.data)
-              .map(([id, data]) => `
-                <div class="version-item" onclick="loadVersion('${id}')">
-                  <strong>${data.title}</strong>
-                  <br>
-                  <small>${new Date(data.savedAt).toLocaleString()}</small>
-                </div>
-              `)
-              .join('');
+            const versionsContainer = document.getElementById('versionsList');
+            versionsContainer.innerHTML = '';
             
-            document.getElementById('versionsList').innerHTML = versionsHtml || 'No saved charts found';
-          }
-        } catch (error) {
-          console.error('Error loading list:', error);
-          document.getElementById('versionsList').innerHTML = 'Error loading charts';
-        }
-      }
-
-      async function loadVersion(versionId) {
-        try {
-          const response = await fetch(`/api/load-chart/${versionId}`);
-          const result = await response.json();
-          
-          if (result.success && result.data) {
-            tvWidget.load(result.data.state);
-            closeModal('loadModal');
-            alert('Loaded successfully!');
+            Object.entries(result.charts).forEach(([id, data]) => {
+              const versionElement = document.createElement('div');
+              versionElement.className = 'version-item';
+              versionElement.onclick = () => loadVersion(id);
+              
+              const date = new Date(data.savedAt);
+              versionElement.innerHTML = `
+                <strong>${data.title}</strong><br>
+                <small>${date.toLocaleString()}</small>
+              `;
+              
+              versionsContainer.appendChild(versionElement);
+            });
+            
+            showModal('loadModal');
           } else {
-            throw new Error(result.error || 'Chart not found');
+            throw new Error(result.error);
           }
         } catch (error) {
-          console.error('Error loading:', error);
-          alert('Failed to load!');
+          console.error('Error loading versions list:', error);
+          alert('Failed to load versions list!');
         }
       }
 
