@@ -10,18 +10,6 @@
     <script src="datafeeds/udf/dist/bundle.js"></script>
 
     <style>
-      .chart-wrapper {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        overflow: hidden;
-      }
-      #chartContainer {
-        width: 100%;
-        height: 100%;
-      }
       .save-controls {
         position: fixed;
         bottom: 20px;
@@ -102,9 +90,6 @@
     </style>
   </head>
   <body>
-    <div class="chart-wrapper">
-      <div id="chartContainer"></div>
-    </div>
     <div class="save-controls">
       <button id="saveBtn" class="save-btn">Save Chart</button>
       <button id="loadBtn" class="save-btn">Load Chart</button>
@@ -138,25 +123,11 @@
       </div>
     </div>
 
+    <div id="chartContainer" style="height:600px; width:100%;"></div>
+
     <script>
       let tvWidget = null;
-      let chartContainer = document.getElementById('chartContainer');
-      
-      // Prevent resize observer loop
-      let resizeTimeout;
-      const handleResize = () => {
-        if (resizeTimeout) {
-          clearTimeout(resizeTimeout);
-        }
-        resizeTimeout = setTimeout(() => {
-          if (tvWidget) {
-            tvWidget.resize();
-          }
-        }, 100);
-      };
 
-      window.addEventListener('resize', handleResize);
-      
       function showModal(modalId) {
         document.getElementById(modalId).style.display = 'block';
       }
@@ -307,8 +278,6 @@
           theme: 'Light',
           style: '1',
           locale: 'en',
-          debug: false,
-          auto_save_delay: 5,
           disabled_features: [
             "show_symbol_logo_in_legend", 
             "events_on_chart",
@@ -318,9 +287,9 @@
             "show_default_markers",
             "show_price_scale_markers",
             "show_object_tree",
-            "drawings",
-            "annotations"
-          ],
+            "drawings", // اگر مارک‌ها با ابزارهای ترسیم اضافه شده‌اند
+    "annotations" // اگر annotations به عنوان مارک‌ها اضافه شده‌اند
+  ],
           enabled_features: ["hide_default_markers"],
           overrides: {
             "mainSeriesProperties.showMarketsOnHovering": false,
@@ -334,7 +303,6 @@
             "showLabels": false,
             "showMarkers": false
           },
-          loading_screen: { backgroundColor: "#ffffff" },
           datafeed: new Datafeeds.UDFCompatibleDatafeed("https://demo-feed-data.tradingview.com"),
           presets: {
             markers: false
