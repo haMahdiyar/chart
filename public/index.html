@@ -23,6 +23,14 @@
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       }
+      #chartContainer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        z-index: 1;
+      }
       .save-btn {
         padding: 8px 16px;
         background: #2962ff;
@@ -90,6 +98,7 @@
     </style>
   </head>
   <body>
+    <div id="chartContainer"></div>
     <div class="save-controls">
       <button id="saveBtn" class="save-btn">Save Chart</button>
       <button id="loadBtn" class="save-btn">Load Chart</button>
@@ -122,8 +131,6 @@
         </div>
       </div>
     </div>
-
-    <div id="chartContainer" style="height:600px; width:100%;"></div>
 
     <script>
       let tvWidget = null;
@@ -278,6 +285,8 @@
           theme: 'Light',
           style: '1',
           locale: 'en',
+          debug: false,
+          auto_save_delay: 5,
           disabled_features: [
             "show_symbol_logo_in_legend", 
             "events_on_chart",
@@ -287,9 +296,9 @@
             "show_default_markers",
             "show_price_scale_markers",
             "show_object_tree",
-            "drawings", // اگر مارک‌ها با ابزارهای ترسیم اضافه شده‌اند
-    "annotations" // اگر annotations به عنوان مارک‌ها اضافه شده‌اند
-  ],
+            "drawings",
+            "annotations"
+          ],
           enabled_features: ["hide_default_markers"],
           overrides: {
             "mainSeriesProperties.showMarketsOnHovering": false,
@@ -303,17 +312,18 @@
             "showLabels": false,
             "showMarkers": false
           },
+          loading_screen: { backgroundColor: "#ffffff" },
           datafeed: new Datafeeds.UDFCompatibleDatafeed("https://demo-feed-data.tradingview.com"),
           presets: {
             markers: false
           }
         });
 
-        tvWidget.onChartReady(() => {
-          const chart = tvWidget.chart();
-          chart.removeOverlay(); // این دستور تمام اورلی‌ها و مارک‌ها را از چارت حذف می‌کند
-          console.log('All overlays and marks removed from chart');
-        });
+        // tvWidget.onChartReady(() => {
+        //   const chart = tvWidget.chart();
+        //   chart.removeOverlay(); // این دستور تمام اورلی‌ها و مارک‌ها را از چارت حذف می‌کند
+        //   console.log('All overlays and marks removed from chart');
+        // });
 
         document.getElementById('saveBtn').addEventListener('click', () => showModal('saveModal'));
         document.getElementById('loadBtn').addEventListener('click', () => {
