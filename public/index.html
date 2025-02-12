@@ -281,11 +281,13 @@
           datafeed: new Datafeeds.UDFCompatibleDatafeed("https://demo-feed-data.tradingview.com"),
         });
 
-        // tvWidget.onChartReady(() => {
-        //   const chart = tvWidget.chart();
-        //   chart.removeOverlay(); // این دستور تمام اورلی‌ها و مارک‌ها را از چارت حذف می‌کند
-        //   console.log('All overlays and marks removed from chart');
-        // });
+        tvWidget.onChartReady(() => {
+          console.log('Chart is ready');
+          const chart = tvWidget.activeChart();
+          chart.getAllStudies().forEach(study => {
+            chart.removeEntity(study.id);
+          });
+        });
 
         document.getElementById('saveBtn').addEventListener('click', () => showModal('saveModal'));
         document.getElementById('loadBtn').addEventListener('click', () => {
