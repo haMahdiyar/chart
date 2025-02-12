@@ -278,48 +278,7 @@
           theme: 'Light',
           style: '1',
           locale: 'en',
-          disabled_features: [
-            "show_symbol_logo_in_legend", 
-            "events_on_chart",
-            "marks_on_bars",
-            "marks_on_hover",
-            "show_markers_on_all_charts",
-            "show_default_markers",
-            "show_price_scale_markers",
-            "show_object_tree",
-            "drawings",
-            "annotations",
-            "create_alerts",
-            "alerts",
-            "show_alert_log",
-            "alert_dialog",
-            "alerts_on_indicators",
-            "show_trading_notifications_history",
-            "trading_notifications",
-            "property_pages",
-            "chart_events", 
-            "show_chart_events", 
-            "show_event_logs", 
-            "events_tab", 
-            "create_events", 
-            "edit_events", 
-            "delete_events"
-          ],
-          enabled_features: ["hide_default_markers"],
-          overrides: {
-            "scalesProperties.showSeriesLastValue": false,
-            "scalesProperties.showStudyLastValue": false,
-            "scalesProperties.showStudyPlotLabels": false
-          },
-          studies_overrides: {
-            "showLastValue": false,
-            "showLabels": false,
-            "showMarkers": false
-          },
           datafeed: new Datafeeds.UDFCompatibleDatafeed("https://demo-feed-data.tradingview.com"),
-          presets: {
-            markers: false
-          }
         });
 
         // tvWidget.onChartReady(() => {
