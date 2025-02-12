@@ -290,8 +290,14 @@
           },
           datafeed: new Datafeeds.UDFCompatibleDatafeed("https://demo-feed-data.tradingview.com"),
           presets: {
-            markers: false  // این تنظیم مارک‌های پیش‌فرض را غیرفعال می‌کند
+            markers: false
           }
+        });
+
+        tvWidget.onChartReady(() => {
+          const chart = tvWidget.chart();
+          chart.removeAllMarks();
+          console.log('All marks removed from chart');
         });
 
         document.getElementById('saveBtn').addEventListener('click', () => showModal('saveModal'));
