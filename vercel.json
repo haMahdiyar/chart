@@ -8,9 +8,19 @@
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/api/(.*)",
       "dest": "server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "server.js",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
     }
   ],
-  "regions": ["hkg1"]
+  "regions": ["hkg1"],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
