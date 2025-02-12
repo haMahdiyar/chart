@@ -282,11 +282,24 @@
             "show_symbol_logo_in_legend", 
             "events_on_chart",
             "marks_on_bars",
-            "marks_on_hover"
+            "marks_on_hover",
+            "show_markers_on_all_charts",
+            "show_default_markers",
+            "show_price_scale_markers",
+            "show_object_tree"
           ],
+          enabled_features: ["hide_default_markers"],
           overrides: {
             "mainSeriesProperties.showMarketsOnHovering": false,
-            "mainSeriesProperties.showBarsMarksOnHovering": false
+            "mainSeriesProperties.showBarsMarksOnHovering": false,
+            "scalesProperties.showSeriesLastValue": false,
+            "scalesProperties.showStudyLastValue": false,
+            "scalesProperties.showStudyPlotLabels": false
+          },
+          studies_overrides: {
+            "showLastValue": false,
+            "showLabels": false,
+            "showMarkers": false
           },
           datafeed: new Datafeeds.UDFCompatibleDatafeed("https://demo-feed-data.tradingview.com"),
           presets: {
