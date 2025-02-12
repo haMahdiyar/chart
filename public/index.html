@@ -288,7 +288,10 @@
             "mainSeriesProperties.showMarketsOnHovering": false,
             "mainSeriesProperties.showBarsMarksOnHovering": false
           },
-          datafeed: new Datafeeds.UDFCompatibleDatafeed("https://demo-feed-data.tradingview.com")
+          datafeed: new Datafeeds.UDFCompatibleDatafeed("https://demo-feed-data.tradingview.com"),
+          presets: {
+            markers: false  // این تنظیم مارک‌های پیش‌فرض را غیرفعال می‌کند
+          }
         });
 
         document.getElementById('saveBtn').addEventListener('click', () => showModal('saveModal'));
