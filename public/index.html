@@ -296,11 +296,9 @@
 
         tvWidget.onChartReady(() => {
           const chart = tvWidget.chart();
-          chart.getAllAnnotations().forEach(annotation => {
-      chart.removeAnnotation(annotation.id); // حذف تمام annotations
-    });
-    console.log('All annotations removed from chart');
-  });
+          chart.removeOverlay(); // این دستور تمام اورلی‌ها و مارک‌ها را از چارت حذف می‌کند
+          console.log('All overlays and marks removed from chart');
+        });
 
         document.getElementById('saveBtn').addEventListener('click', () => showModal('saveModal'));
         document.getElementById('loadBtn').addEventListener('click', () => {
