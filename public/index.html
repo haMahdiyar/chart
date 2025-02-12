@@ -278,7 +278,16 @@
           theme: 'Light',
           style: '1',
           locale: 'en',
-          disabled_features: ["show_symbol_logo_in_legend", "events_on_chart"],
+          disabled_features: [
+            "show_symbol_logo_in_legend", 
+            "events_on_chart",
+            "marks_on_bars",
+            "marks_on_hover"
+          ],
+          overrides: {
+            "mainSeriesProperties.showMarketsOnHovering": false,
+            "mainSeriesProperties.showBarsMarksOnHovering": false
+          },
           datafeed: new Datafeeds.UDFCompatibleDatafeed("https://demo-feed-data.tradingview.com")
         });
 
