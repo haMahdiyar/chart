@@ -296,9 +296,11 @@
 
         tvWidget.onChartReady(() => {
           const chart = tvWidget.chart();
-          chart.removeAllMarks();
-          console.log('All marks removed from chart');
-        });
+          chart.getAllAnnotations().forEach(annotation => {
+      chart.removeAnnotation(annotation.id); // حذف تمام annotations
+    });
+    console.log('All annotations removed from chart');
+  });
 
         document.getElementById('saveBtn').addEventListener('click', () => showModal('saveModal'));
         document.getElementById('loadBtn').addEventListener('click', () => {
